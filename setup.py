@@ -4,7 +4,7 @@ with open("README.md", "r") as f:
     long_description = f.read()
 
 setuptools.setup(
-    name="aiorequests-Slime", # Replace with your own username
+    name="aiorequests", # Replace with your own username
     version="0.0.1",
     author="Slime",
     author_email="selim.lanouar@gmail.com",
