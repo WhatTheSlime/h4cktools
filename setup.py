@@ -4,7 +4,7 @@ setup(
     name='rqhelper-whattheslime',
     version='0.0.1',
     description='Requests lib wrapper',
-    url='git@github.com:WhatTheSlime/aiorequests.git',
+    url='git@github.com:WhatTheSlime/rqhelper.git',
     author='Sélim Lanouar',
     author_email='selim.lanouar@gmail.com',
     license='unlicense',
