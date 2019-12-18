@@ -1,14 +1,19 @@
 from setuptools import setup
 
 setup(
-    name='aiorequests-whattheslime',
+    name='rqhelper-whattheslime',
     version='0.0.1',
-    description='Request wrapper',
+    description='Requests lib wrapper',
     url='git@github.com:WhatTheSlime/aiorequests.git',
     author='Sélim Lanouar',
     author_email='selim.lanouar@gmail.com',
     license='unlicense',
-    packages=['aiorequests'],
-    zip_safe=False
+    packages=['rqhelper'],
+    python_requires=">=3.6",
+	install_requires=[
+		'requests',
+		'asyncio',
+	],
+	zip_safe=False
 )
 

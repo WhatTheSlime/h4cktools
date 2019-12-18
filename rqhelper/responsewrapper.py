@@ -1,17 +1,14 @@
-import bs4
-import html
+from bs4 import BeautifulSoup
 import lxml.html
 import re
-import types
 
-from lib.utils.parser import remove_domain
+from parser import remove_domain
 
 
 class WrappedResponse:
     """The class is a wrapper for requests.models.Response class.
     It implements helpful methods to analyse http(s) response.
     """
-
     def __init__(self, response, scope):
         self.response = response
         self.scope = scope
@@ -98,7 +95,7 @@ class WrappedResponse:
 
         tag: tag name to find.
         """
-        soup = bs4.BeautifulSoup(self.response.text, "lxml")
+        soup = BeautifulSoup(self.response.text, "lxml")
         return soup.find(*args, **kwargs)
 
     def tags(self, *args, **kwargs):
@@ -106,7 +103,7 @@ class WrappedResponse:
 
         tag: tag name to find.
         """
-        soup = bs4.BeautifulSoup(self.response.text, "lxml")
+        soup = BeautifulSoup(self.response.text, "lxml")
         return soup.findAll(*args, **kwargs)
 
     def xml(self):
@@ -125,7 +122,7 @@ class WrappedResponse:
     def scripts(self):
         """Return all src values of scripts in content page.
         """
-        soup = bs4.BeautifulSoup(self.response.text, "lxml")
+        soup = BeautifulSoup(self.response.text, "lxml")
         scripts = [script.prettify() for script in soup.findAll("script")]
         return scripts
 

@@ -1,2 +1,2 @@
-# aiorequests
+# ReQuests Helper
 Requests lib wrapper

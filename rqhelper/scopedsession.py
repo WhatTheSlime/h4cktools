@@ -6,8 +6,8 @@ from urllib.parse import quote
 from urllib.parse import urlparse
 from requests.cookies import RequestsCookieJar
 
-from lib.http import aio
-from lib.http.responsewrapper import WrappedResponse
+import aio
+from responsewrapper import WrappedResponse
 
 
 class ScopedSession(aio.Session):
