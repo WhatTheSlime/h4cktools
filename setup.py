@@ -13,6 +13,7 @@ setup(
 	install_requires=[
 		'requests',
 		'asyncio',
+        'bs4',
 	],
 	zip_safe=False
 )
