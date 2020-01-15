@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 import lxml.html
 import re
 
-from .parser import remove_domain
+from parser import remove_domain
 
 
 class WrappedResponse:
