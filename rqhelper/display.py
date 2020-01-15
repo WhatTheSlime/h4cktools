@@ -18,7 +18,7 @@ def init_logger(name, logs_folder_path, debug=False, verbose=False):
 
     # Setup logs file.
     filename = os.path.join(
-        logs_folder_path, f"{name.lower()}_{datetime.today()}.log"
+        logs_folder_path, f"{name.lower()}.log"
     )
     logging.basicConfig(filename=filename, filemode="w")
 
