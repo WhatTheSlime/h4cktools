@@ -33,3 +33,21 @@ def is_local_url(url, session):
         not parsed_url.netloc
         or session.domain.replace("www.", "") in parsed_url.netloc
     )
+
+def headers_list_to_dict(headers_list):
+    """Converted a list of strings, each representing an http header, 
+    into a dictionary.
+
+    Args:
+        headers_list (list): list of http headers to convert.
+
+    Returns:
+        dict: headers dict.
+    """
+    headers_dict = {}
+
+    for header in headers_list:
+        name, value = header.split(":", 1)
+        headers_dict[name.strip()] = value.strip()
+
+    return headers_dict
