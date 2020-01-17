@@ -6,16 +6,14 @@ import os
 from datetime import datetime
 
 
-def init_logger(name, logs_folder_path, debug=False, verbose=False):
+def init_logger(name, logs_folder_path, verbosity):
     """Initialization of coloredlogs.
 
     Parameters:
         name: Default name will be print on the log.
         logs_folder_path: Path to folder where logs will be stored.
-        debug: Enable debugs and verboses logs.
-        verbose: Enable verboses logs.
+        verbosity: Increment verbose mode.
     """
-
     # Setup logs file.
     filename = os.path.join(
         logs_folder_path, f"{name.lower()}.log"
@@ -52,10 +50,9 @@ def init_logger(name, logs_folder_path, debug=False, verbose=False):
 
     coloredlogs.install(level="INFO")
 
-    if verbose:
+    if verbosity == 1:
         coloredlogs.install(level="VERBOSE")
-
-    if debug:
+    elif verbosity:
         coloredlogs.install(level="DEBUG")
 
     return logging.getLogger(name)
@@ -68,7 +65,7 @@ def display_progress(
     suffix="Completed",
     decimals=1,
     length=50,
-    fill="\033[34m▓\033[0m",
+    fill="\033[32m▓\033[0m",
     percent_format=False,
 ):
     """Call in a loop to create terminal progress bar

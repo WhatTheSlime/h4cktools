@@ -8,7 +8,7 @@ from requests.cookies import RequestsCookieJar
 
 from rqhelper import aio
 from rqhelper.responsewrapper import WrappedResponse
-
+from rqhelper.parser import headers_list_to_dict
 
 class ScopedSession(aio.Session):
     """ScopedSession is use make asynchonous requests in specified scope.
@@ -62,9 +62,19 @@ class ScopedSession(aio.Session):
         self.port = port
 
     async def set_index_response(self):
-        """Get the response of the index page.
+        """Get the response of the index page
         """
         self.index_response = await self.get("/")
+
+    def set_headers(self, args):
+        """Changing headers according to arguments
+
+        Args:
+            args: argparse object.
+        """
+        self.headers = headers_list_to_dict(args.headers)
+        if args.add_headers:
+            self.headers.update(headers_list_to_dict(args.add_headers))
 
     async def request(self, method, url, *args, **kwargs):
         time.sleep(self.timeout)
