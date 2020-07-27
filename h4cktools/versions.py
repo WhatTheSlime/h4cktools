@@ -1,23 +1,33 @@
 import re
 
+
 #: Generic regex to extract a version
 version_regex = r"((\d+)\.(\d+)(\.(\d+))?(\.(\d+))?)"
 
-
-def extract(string):
+def extract_version(text: str):
     """Extract a version from a generic string.
 
     Args:
-        string (str): string that contains a version.
+        text (str): Text that contains a version.
     """
-    match = re.search(version_regex, string)
-    return match.group(1) if match else None
+    match = re.search(version_regex, text)
+    return Version(match.group(1)) if match else None
+
+def extract_versions(text: str):
+    """Extract a version from a generic string.
+
+    Args:
+        text (str): Text that contains a version.
+
+    Returns:
+
+    """
+    versions = re.findall(version_regex, text)
+    return [Version(v[0]) for v in versions]
 
 class Version:
     """Object parsing versions"""
-    def __init__(self, version):
-        if not isinstance(version, str):
-            raise TypeError(f"'{version}' type is not str")
+    def __init__(self, version: str):
         self.nums = [int(n) for n in version.split(".")]
 
     def __eq__(self, other):

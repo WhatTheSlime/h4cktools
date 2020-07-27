@@ -5,6 +5,7 @@ from requests import adapters
 from functools import partial
 from urllib.parse import urlparse, urljoin
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
 
 
 class AsyncSession(requests.Session):
@@ -273,8 +274,13 @@ class Browser:
     ):
         pass
 
-    def save(self, output: str = "."):
-        pass
+    def save(self, output_dir: str = ".", filename: str = "h4ckbrowser"):
+        timestamp = datetime.timestamp(datetime.now())
+        filename = "".join(["h4ckbrowser_", timestamp, ".pkl"])
+        path = os.path.join(output_dir, filename)
+
+        with open(path, 'wb') as output:
+            pickle.dump(self, output, pickle.HIGHEST_PROTOCOL)
 
     async def close(self):
         self.session.close()

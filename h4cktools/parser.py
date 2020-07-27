@@ -2,6 +2,7 @@ import re
 import lxml.html
 from urllib.parse import urlparse, urljoin
 
+
 def remove_domain(url):
     """Retrive begin of an url whatever if it start by http or https
     Args:
