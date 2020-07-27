@@ -14,6 +14,7 @@ setup(
         'requests',
         'asyncio',
         'bs4',
+        'lxml'
     ],
 )
 
