@@ -48,6 +48,9 @@ class Page:
         self.isok = (self.scode == 200)
         self.isforbidden = (self.scode == 403)
         self.isredirect = response.is_redirect
+        self.links = self.__find_links()
+        self.srcs = self.__find_sources()
+        self.paths = self.__find_paths()
 
     def __getattr__(self, attr):
         orig_attr = getattr(self.response, attr)
@@ -139,11 +142,6 @@ class Page:
             response = self.response.content
         return html.fromstring(response)
 
-    def src(self):
-        """Return all src values of scripts in content page.
-        """
-        return [str(src) for src in self.xml().xpath("//script/@src")]
-
     def scripts(self):
         """Return all src values of scripts in content page.
         """
@@ -151,10 +149,25 @@ class Page:
         scripts = [script.prettify() for script in soup.findAll("script")]
         return scripts
 
-    def links(self):
+    def __find_sources(self):
+        """Return all src values of scripts in content page.
+        """
+        return [str(src) for src in self.xml().xpath("//script/@src")]
+
+    def __find_links(self):
         """Return all href values links in content page.
         """
-        return self.xml().xpath("//link/@href")
+        return self.xml().xpath("//a/@href")
+
+    def __find_paths(self):
+        paths = set()
+        hostname = urlparse(self.url).netloc
+
+        for link in self.links:
+            parsed = urlparse(link)
+            if parsed.path and (parsed.netloc == hostname or not parsed.netloc):
+                paths.add(parsed.path)
+        return list(paths)
 
     def images(self):
         """Return all src values of img in centent page.
@@ -163,6 +176,7 @@ class Page:
 
     def __repr__(self):
         return f"<[{self.scode}] {self.url}>"
+
 
 class Browser:
     def __init__(
@@ -174,6 +188,7 @@ class Browser:
     ):
         self.set_scope(scope)
         self.session = AsyncSession(loop=loop, workers=workers)
+        self.session.verify = False
         self.hist = []
         self.page = None
         self.page_index = 0
@@ -190,6 +205,17 @@ class Browser:
             url = url[:-1]
 
         self.scope = url
+
+    def set_proxy(self, url: str):
+        parsed_url = urlparse(url)
+        proxy = "://".join([parsed_url.scheme, parsed_url.netloc])
+        self.session.proxies = {
+            "http": proxy,
+            "https": proxy
+        }
+
+    def unset_proxy(self):
+        self.session.proxy = {}
 
     def request(self, method, url: str, *args, **kwargs):
         parsed_url = urlparse(url)
@@ -232,10 +258,11 @@ class Browser:
     async def goto(self, url):
         """Go to new url and set it as new scope
         """ 
-        self.page = await self.get(url)
+        self.page = await self.get(url, allow_redirects=False)
         self.hist.append(self.page)
         self.page_index = len(self.hist) - 1
         self.set_scope(self.page.host)
+        return self.page
 
     async def prev(self):
         """Go on previous page
@@ -243,6 +270,7 @@ class Browser:
         if self.page_index > 0:
             self.page_index -= 1
             self.page = await self.get(self.hist[self.page_index].url)
+        return self.page
 
     async def next(self):
         """Go on next page
@@ -250,6 +278,7 @@ class Browser:
         if self.page_index < len(self.hist) - 1:
             self.page_index += 1
             self.page = await self.get(self.hist[self.page_index].url)
+        return self.page
 
     def goin(self, sub_path: str):
         """Go in child local path

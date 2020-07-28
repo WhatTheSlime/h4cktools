@@ -1,3 +1,5 @@
+import urllib3
+
 from .browser import Browser
 from .coder import *
 from .cipher import *
@@ -7,5 +9,7 @@ from .versions import (
 	extract_versions, 
 	Version as ver
 )
-
 from pathlib import Path
+from .xss import *
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
