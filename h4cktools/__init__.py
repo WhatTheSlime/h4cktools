@@ -1,7 +1,14 @@
 import urllib3
 
+from pathlib import Path
+from urllib.parse import (
+	urlparse,
+	urljoin,
+	urlencode as qurlencode,
+)
+
 from .http import HTTPSession, AsyncSession
-from .coder import *
+from .encoder import *
 from .cipher import *
 from .versions import (
 	version_regex, 
@@ -9,7 +16,6 @@ from .versions import (
 	extract_versions, 
 	Version as ver
 )
-from pathlib import Path
 from .xss import *
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)

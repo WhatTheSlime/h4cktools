@@ -4,7 +4,7 @@ setup(
     name="h4cktools-whattheslime",
     version="0.1",
     description="Requests lib wrapper",
-    url="git@github.com:WhatTheSlime/rqhelper.git",
+    url="https://github.com/WhatTheSlime/h4cktools",
     author="Sélim Lanouar",
     author_email="selim.lanouar@gmail.com",
     license="unlicense",
