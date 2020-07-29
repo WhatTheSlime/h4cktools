@@ -3,10 +3,15 @@
 $ pip3 install git+https://github.com/WhatTheSlime/h4cktools.git
 ```
 
-## Browser
 ```python
->>> from h4cktools import Browser
->>> b = Browser()
->>> b.goto("https://google.com")
+>>> from h4cktools import *
 ```
 
+## Session
+
+
+```python
+>>> s = Session()
+>>> s = Session("http://example.com")
+>>> await s.get()
+```

@@ -1,6 +1,6 @@
 import urllib3
 
-from .browser import Browser
+from .http import HTTPSession, AsyncSession
 from .coder import *
 from .cipher import *
 from .versions import (
