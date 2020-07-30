@@ -1,26 +1,32 @@
+"""
+"""
 import re
 
+__author__ = "sélim lanouar @WhatTheSlime"
 
-#: Generic regex to extract a version
+#: Regular expression that match a version
 version_regex = r"((\d+)\.(\d+)(\.(\d+))?(\.(\d+))?)"
 
 def extract_version(text: str):
-    """Extract a version from a generic string.
-
-    Args:
-        text (str): Text that contains a version.
-    """
-    match = re.search(version_regex, text)
-    return Version(match.group(1)) if match else None
-
-def extract_versions(text: str):
-    """Extract a version from a generic string.
+    """Extract version from a string.
 
     Args:
         text (str): Text that contains a version.
 
     Returns:
+        Version: Version if found, None otherwise
+    """
+    match = re.search(version_regex, text)
+    return Version(match.group(1)) if match else None
 
+def extract_versions(text: str):
+    """Extract versions from a string.
+
+    Args:
+        text (str): Text that contains a version.
+
+    Returns:
+        list: list of found Versions
     """
     versions = re.findall(version_regex, text)
     return [Version(v[0]) for v in versions]
@@ -30,7 +36,7 @@ class Version:
     def __init__(self, version: str):
         self.nums = [int(n) for n in version.split(".")]
 
-    def __eq__(self, other):
+    def __eq__(self, other: self) -> bool:
         if len(self) != len(other):
             return False
 
@@ -39,7 +45,7 @@ class Version:
                 return False
         return True
 
-    def __lt__(self, other):
+    def __lt__(self, other: self) -> bool:
         for i in range(0, len(min(self.nums, other.nums, key=len))):
             if self.nums[i] < other.nums[i]:
                 return True
@@ -47,13 +53,13 @@ class Version:
                 return False
         return False
 
-    def __le__(self, other):
+    def __le__(self, other: self) -> bool:
         if self == other:
             return True
         return self < other
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.nums)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return ".".join([str(num) for num in self.nums])
