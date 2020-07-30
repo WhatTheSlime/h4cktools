@@ -5,6 +5,7 @@ from base64 import (
 	b64decode as _b64decode
 )
 import cgi
+import html
 from urllib.parse import (
 	quote_plus,
 	unquote_plus
@@ -77,11 +78,20 @@ def furlencode(s: str):
 		format(ord(c), "x")) for c in s
 	)
 
-def furldecode(s):
-	return "".join("%{0:0>2}".format(
-		format(ord(c), "x")
-	) for c in s)
-
 def htmlencode(s):
-	return cgi.escape(s).encode("ascii", "xmlcharrefreplace")
+	return html.escape(s, quote=False)
 
+def fhtmlencode(s):
+	return "".join(f"&#{ord(c)}" for c in s)
+
+def htmldecode(s):
+	return html.unescape(s)
+
+def hexencode(s):
+	return "".join(f"\\{hex(ord(c))[1:]}" for c in s)
+
+def uhexencode(s):
+	return "".join(f"\\u00{hex(ord(c))[2:]}" for c in s)
+	
+def octencode(s):
+	return "".join(f"\\{oct(ord(c))}" for c in s)

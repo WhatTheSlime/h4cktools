@@ -18,10 +18,20 @@ if __name__ == "__main__":
 	test = b64encode(string)
 	print(b64encode(string))
 	print(str(b64decode(b64encode(string))))
-
+	print()
 	print(furlencode(string))
 	print(urldecode(furlencode(string)))
-
+	print()
 	print(urlb64encode(string))
 	print(urlb64decode(urlb64encode(string)))
+	print()
+	print(fhtmlencode(string))
+	print(htmldecode(string))
+
+	print(f"\\{hex(ord('j'))[1:]}")
+	# unicode
+	test = f"\\u00{hex(ord('javascript'))[2:]}"
+	# ord
+	print(f"\\{oct(ord('javascript'))[2:]}")
+	print(urlencode(crlf))
 

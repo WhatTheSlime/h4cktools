@@ -68,6 +68,7 @@ class HTTPSession:
         self.__session = AsyncSession(loop=loop, workers=workers)
         self.__session.verify = verify
         self.hist = []
+        self.headers = self.session.headers
         self.page = None
         self.page_index = 0
 
@@ -134,6 +135,7 @@ class HTTPSession:
         self.hist.append(self.page)
         self.page_index = len(self.hist) - 1
         self.set_scope(self.page.host)
+        self.headers = self.__session.headers
         return self.page
 
     def follow(self):
@@ -237,9 +239,6 @@ class Page:
             return hooked
         else:
             return orig_attr
-
-    def show_headers(self):
-        return to_str(self.response.headers)
 
     def __exists(self):
         """Return True if the requested url exists but not necessarily 
