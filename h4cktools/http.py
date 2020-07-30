@@ -6,8 +6,9 @@ from functools import partial
 from urllib.parse import urlparse, urljoin
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
+from os.path import join as path_join
 
-from .display import to_str
+from typing import TypeVar
 
 HTTP_METHODS = [
     "GET",
@@ -20,6 +21,8 @@ HTTP_METHODS = [
     "TRACE",
     "PATCH"
 ]
+
+USERAGENT = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0"
 
 class AsyncSession(requests.Session):
     def __init__(self, loop=None, workers=1):
@@ -55,101 +58,153 @@ class AsyncSession(requests.Session):
         done, _ = self.loop.run_until_complete(asyncio.wait(coros))
         return [t.result() for t in done]
 
+
 class HTTPSession:
     def __init__(
         self,
-        scope: str = "",
+        host: str = "",
         loop=None,
-        workers: int = 5, 
-        from_json: dict = None,
+        workers: int = 5,
         verify: bool = False,
     ):
-        self.set_scope(scope)
-        self.__session = AsyncSession(loop=loop, workers=workers)
-        self.__session.verify = verify
+        self._session = AsyncSession(loop=loop, workers=workers)
+        self._session.verify = verify
+        self.host = host
+        self.agent = USERAGENT
         self.hist = []
-        self.headers = self.session.headers
         self.page = None
         self.page_index = 0
 
-    def set_scope(self, url):
-        """Correct and set the scope.
+    def __getattr__(self, attr):
+        orig_attr = getattr(self._session, attr)
+        if callable(orig_attr):
+            def hooked(*args, **kwargs):
+                result = orig_attr(*args, **kwargs)
+                # prevent wrapped object from becoming unwrapped
+                if result == self._session:
+                    return self
+                return result
+            return hooked
+        else:
+            return orig_attr
+
+    def __setattr__(self, name, value):
+        if name == "agent" and isinstance(value, str):
+            self._session.headers["User-Agent"] = value
+        elif name == "proxy" and isinstance(value, str):
+            if value:
+                parsed = urlparse(value)
+                proxy = "://".join([parsed.scheme, parsed.netloc])
+                self._session.proxies = {
+                    "http": proxy,
+                    "https": proxy
+                }
+            else:
+                self._session.proxies = {}
+        elif name == "workers":
+            self._session.thread_pool = ThreadPoolExecutor(max_workers=value)
+        elif name == "headers":
+            pass
+        elif name == "host":
+            self.__dict__[name] = self._parse_host(value)
+        else:
+            self.__dict__[name] = value
+
+    def _parse_host(self, url):
+        """Correct and set the host.
 
         Parameter:
             url: target base url
         """
         parsed = urlparse(url)
 
-        self.scope = "://".join([parsed.scheme or "http", parsed.netloc])
-
-    def set_proxy(self, url: str):
-        parsed = urlparse(url)
-        proxy = "://".join([parsed.scheme, parsed.netloc])
-        self.__session.proxies = {
-            "http": proxy,
-            "https": proxy
-        }
-
-    def unset_proxy(self):
-        self.__session.proxies = {}
-
-    def headers(self):
-        return to_str(self.__session.headers)
+        return "://".join([parsed.scheme or "http", parsed.netloc])
 
     # Requests
     def request(self, method: str, url: str, *args, **kwargs):
         parsed = urlparse(url)
 
         if not parsed.netloc:
-            if self.scope:
-                url = urljoin(self.scope, parsed.path)
-            if not self.scope:
+            if self.host:
+                url = urljoin(self.host, parsed.path)
+            if not self.host:
                 raise Exception(
-                    "Cannot resolve local url if the scope "
+                    "Cannot resolve local url if the host "
                     "has not been defined."
                 )
-        return self.__session.request(method, url, *args, **kwargs)
+        return self._session.request(method, url, *args, **kwargs)
+
+    '''
+    def strrequest(self, string: str, *args, **kwargs):
+        """Create requests from full string requests
+        """
+        delimiter = "\n\n\n\n"
+
+        if delimiter in string:
+
+
+        headers = []
+
+        headers, content = string.split("\n\n\n\n", 1)
+        return  
+    '''
 
     def get(self, url: str, *args, **kwargs):
         return self.request("GET", url, *args, **kwargs)
 
+
     def post(self, url: str, *args, **kwargs):
+        """
+        """
         return self.request("POST", url, *args, **kwargs)
 
+
     def head(self, url: str, *args, **kwargs):
+        """
+        """
         return self.request("HEAD", url, *args, **kwargs)
 
-    def run(self, *coros):
-        results = self.__session.run(*coros)
 
+    def sendall(self, *coros):
+        """
+        """
+        results = self._session.run(*coros)
         return results
 
     # Navigation
     def goto(self, url: str):
-        """Go to new url and set it as new scope
+        """Go to new url and set it as new host
         """
-        return self.run(self.__goto(url))
+        return self.sendall(self._goto(url))[0]
 
-    async def __goto(self, url: str):
+
+    async def _goto(self, url: str):
+        """
+        Args:
+
+        Returns:
+            Page: reached page
+        """
         self.page = await self.get(url, allow_redirects=False)
         self.hist.append(self.page)
         self.page_index = len(self.hist) - 1
-        self.set_scope(self.page.host)
-        self.headers = self.__session.headers
+        self.host = (self.page.host)
         return self.page
 
     def follow(self):
         """Follow redirection
         """
-        if "Location" in self.page.response.headers.keys():
-            return self.goto(self.page.response.headers.get("Location"))
+        if "Location" in self.page.headers.keys():
+            return self.goto(self.page.headers.get("Location"))
 
     def prev(self):
         """Go on previous page
         """
         if self.page_index > 0:
             self.page_index -= 1
-            self.page = self.run(self.get(self.hist[self.page_index].url))[0]
+            self.page = self.sendall(
+                self.get(self.hist[self.page_index].url), allow_redirects=False
+            )[0]
         return self.page
 
     def next(self):
@@ -157,7 +212,9 @@ class HTTPSession:
         """
         if self.page_index < len(self.hist) - 1:
             self.page_index += 1
-            self.page = self.run(self.get(self.hist[self.page_index].url))[0]
+            self.page = self.sendall(
+                self.get(self.hist[self.page_index].url, allow_redirects=False)
+            )[0]
         return self.page
 
     def goin(self, sub_path: str):
@@ -165,7 +222,7 @@ class HTTPSession:
         """
         if sub_path.startswith("/"):
             sub_path = sub_path[1:]
-        return self.goto(urljoin(self.page.path, sub_path))
+        return self.goto(path_join(self.page.path, sub_path))
 
     def goout(self):
         """Go in parent path
@@ -207,55 +264,37 @@ class HTTPSession:
         return to_str(methods)
 
     def close(self):
-        self.__session.close()
+        self._session.close()
 
 class Page:
     """The class is a wrapper for requests.models.Response class.
     It implements helpful methods to analyse http(s) response.
     """
     def __init__(self, response):
-        self.response = response
-        self.url = self.response.url
-        parsed = urlparse(self.response.url)
+        self._response = response
+        parsed = urlparse(response.url)
         self.host = "://".join([parsed.scheme, parsed.netloc])
         self.path = parsed.path
         self.code = response.status_code
-        self.is_ok = (self.code == 200)
-        self.is_forbidden = (self.code == 403)
-        self.exists = self.__exists()
-        self.links = self.__find_links()
-        self.srcs = self.__find_sources()
-        self.paths = self.__find_paths()
+        self.isok = (self.code == 200)
+        self.isforbidden = (self.code == 403)
+        self.exists = self._exists()
+        self.links = self._find_links()
+        self.srcs = self._find_sources()
+        self.paths = self._find_paths()
 
     def __getattr__(self, attr):
-        orig_attr = getattr(self.response, attr)
+        orig_attr = getattr(self._response, attr)
         if callable(orig_attr):
             def hooked(*args, **kwargs):
                 result = orig_attr(*args, **kwargs)
-                # prevent wrapped response from becoming unwrapped
-                if result == self.response:
+                # prevent wrapped object from becoming unwrapped
+                if result == self._response:
                     return self
                 return result
             return hooked
         else:
             return orig_attr
-
-    def __exists(self):
-        """Return True if the requested url exists but not necessarily 
-        accessible, False otherwise.
-        """
-        url = self.response.url
-        location = ""
-        if self.is_redirect:
-            location = self.response.headers.get("Location", None)
-            if location:
-                location = urlparse(location).path
-                url = urlparse(url).path
-        return self.response.status_code in (
-            200,
-            401,
-            403,
-        ) or location == "".join((url, "/"))
 
     # Searching Methods
     def search(self, regex):
@@ -263,66 +302,74 @@ class Page:
         regex: regular(s) expression to use. 
         """
         if isinstance(regex, str):
-            return re.search(regex, self.response.text)
+            return re.search(regex, self._response.text)
         elif isinstance(regex, tuple):
             for r in regex:
-                match = re.search(r, self.response.text)
+                match = re.search(r, self._response.text)
                 if match:
                     return match
+
+
     def findall(self, regex):
         """Use regular expression to find all match of an expression in the 
         response content.
         regex: regular expression to use.
         """
-        return re.findall(regex, self.response.text)
+        return re.findall(regex, self._response.text)
 
-    def extract_version(self):
-        """Extract version number from a text string.
-        """
-        # Remove HTML
-        text = re.sub("<[^>]+>", "", self.response.text)
-        match = re.search(r"\b[vV]?(\d+(\.\d+){1,3})\b", text)
-        return match.group(1) if match else None
 
     def tag(self, *args, **kwargs):
         """Return http response searched tags.
         tag: tag name to find.
         """
-        soup = BeautifulSoup(self.response.text, "lxml")
+        soup = BeautifulSoup(self._response.text, "lxml")
         return soup.find(*args, **kwargs)
 
+
     def tags(self, *args, **kwargs):
-        """Return http response searched tags.
-        tag: tag name to find.
+        """Return http response searched tags
+        Args:
+            BeautifulSoup.findall args
         """
-        soup = BeautifulSoup(self.response.text, "lxml")
+        soup = BeautifulSoup(self._response.text, "lxml")
         return soup.findAll(*args, **kwargs)
 
+
     def xml(self):
-        """Converts response into an XML object.
+        """Converts response into an XML object
         """
-        if not isinstance(self.response, bytes) and self.response.content:
-            return html.fromstring(self.response.text)
+        if not isinstance(self._response, bytes) and self._response.content:
+            return html.fromstring(self._response.text)
         return html.HtmlElement()
 
+
     def scripts(self):
-        """Return all src values of scripts in content page.
+        """Return all src values of scripts in content page
         """
-        soup = BeautifulSoup(self.response.text, "lxml")
+        soup = BeautifulSoup(self._response.text, "lxml")
         scripts = [script.prettify() for script in soup.findAll("script")]
         return scripts
 
-    def __find_sources(self):
-        """Return all src values of scripts in content page.
+
+    def images(self):
+        """Return all src values of img in centent page
+        """
+        return self.xml().xpath("//img/@src")
+
+
+    def _find_sources(self):
+        """Return all src values of scripts in content page
         """
         return [str(src) for src in self.xml().xpath("//script/@src")]
 
-    def __find_links(self):
+
+    def _find_links(self):
         """Return all href values links in content page.
         """
         return self.xml().xpath("//a/@href")
 
-    def __find_paths(self):
+
+    def _find_paths(self):
         paths = set()
         hostname = urlparse(self.url).netloc
 
@@ -332,10 +379,20 @@ class Page:
                 paths.add(parsed.path)
         return list(paths)
 
-    def images(self):
-        """Return all src values of img in centent page.
+
+    def _exists(self):
+        """Return True if the requested url exists but not necessarily 
+        accessible, False otherwise.
         """
-        return self.xml().xpath("//img/@src")
+        url = self._response.url
+        location = ""
+        if self.is_redirect:
+            location = self._response.headers.get("Location", None)
+            if location:
+                location = urlparse(location).path
+                url = urlparse(url).path
+        return self.code in (200, 401, 403) or location == "".join((url, "/"))
+
 
     def __repr__(self):
         return f"<[{self.code}] {self.url}>"

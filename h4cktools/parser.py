@@ -3,8 +3,9 @@ import lxml.html
 from urllib.parse import urlparse, urljoin
 
 
-def remove_domain(url):
+def domain_name(url):
     """Retrive begin of an url whatever if it start by http or https
+    
     Args:
         url (str): Url to remove domain
 
