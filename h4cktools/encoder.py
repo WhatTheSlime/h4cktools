@@ -13,7 +13,6 @@ from urllib.parse import (
     unquote_plus
 )
 
-
 ## Encoding
 
 def b64encode(obj: Union[str, bytes], encoding="utf-8") -> str:
@@ -200,6 +199,8 @@ def urlb64decode(obj: Union[str, bytes], encoding="utf-8") -> str:
         _obj = str(obj).encode(encoding)
     return urlsafe_b64decode(_obj).decode(encoding)
 
+def hexdecode(s: str):
+    return bytes.fromhex(s).decode("ASCII")
 
 def autodecode(string: str) -> str:
     """Detect the string encoding and try to decode

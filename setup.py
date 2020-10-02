@@ -16,6 +16,7 @@ setup(
         "bs4",
         "lxml",
         "jwt",
+        "requests-html"
     ],
 )
 

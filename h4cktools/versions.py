@@ -2,24 +2,36 @@
 """
 import re
 
-__author__ = "sélim lanouar @WhatTheSlime"
-
 #: Regular expression that match a version
-version_regex = r"((\d+)\.(\d+)(\.(\d+))?(\.(\d+))?)"
+version_regex = r"((?:\d+\.)+\d+)"
 
-def extract_version(text: str):
+#: Regular expression that match a version by specifying
+format_version_regex = "((?:\d+\.){}\d+)"
+
+def extract_version(text: str, numbers=1):
     """Extract version from a string.
 
     Args:
         text (str): Text that contains a version.
 
+    Keywords:
+        numbers (int): number of numbers expected in the version
+            if 1, it will get {n} numbers
+
     Returns:
         Version: Version if found, None otherwise
     """
-    match = re.search(version_regex, text)
+    #: Regular expression quantifier
+    q = "+"
+    if numbers > 1:
+        q = str(numbers - 1).join(["{{", "}}"])
+    elif numbers < 1:
+        raise ValueError("Qunatifier must be a positive not null integer")
+
+    match = re.search(format_version_regex.format(q), text)
     return Version(match.group(1)) if match else None
 
-def extract_versions(text: str):
+def extract_versions(text: str) -> list:
     """Extract versions from a string.
 
     Args:
@@ -31,12 +43,13 @@ def extract_versions(text: str):
     versions = re.findall(version_regex, text)
     return [Version(v[0]) for v in versions]
 
+
 class Version:
     """Object parsing versions"""
     def __init__(self, version: str):
         self.nums = [int(n) for n in version.split(".")]
 
-    def __eq__(self, other: self) -> bool:
+    def __eq__(self, other) -> bool:
         if len(self) != len(other):
             return False
 
@@ -45,7 +58,7 @@ class Version:
                 return False
         return True
 
-    def __lt__(self, other: self) -> bool:
+    def __lt__(self, other) -> bool:
         for i in range(0, len(min(self.nums, other.nums, key=len))):
             if self.nums[i] < other.nums[i]:
                 return True
@@ -53,7 +66,7 @@ class Version:
                 return False
         return False
 
-    def __le__(self, other: self) -> bool:
+    def __le__(self, other) -> bool:
         if self == other:
             return True
         return self < other
@@ -63,3 +76,4 @@ class Version:
 
     def __repr__(self) -> str:
         return ".".join([str(num) for num in self.nums])
+        

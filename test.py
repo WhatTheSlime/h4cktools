@@ -1,37 +1,20 @@
 #!/usr/bin/env python3
 import asyncio
-from h4cktools import *
+import time
+from h4cktools.http.asyncsession import AsyncSession
+from h4cktools.http.httpsession import HTTPSession
 
-
-async def test(s):
-	r = await s.get("http://www.google.com")
-	return r.url, r.status_code == 200 
 
 if __name__ == "__main__":
-	urls = ["https://google.com", "https://facebook.com"]
+	s = HTTPSession()
+	s.proxies["https"] = "http://127.0.0.1:8080"
+	s.verify = False
+	print(s.thread_pool._max_workers)
+	
+	rqs = s.get(f"https://italydeco.fr/", redirects=True)
 
-	s = HTTPSession(workers=10)
-	# br.set_proxy("http://127.0.0.1:8080")
+	rps = s.run(rqs)
+	
+	rps.soup()
 
-	string = "heyyyyy sdfsqdqsdf qdfqsdfq"
-
-	test = b64encode(string)
-	print(b64encode(string))
-	print(str(b64decode(b64encode(string))))
-	print()
-	print(furlencode(string))
-	print(urldecode(furlencode(string)))
-	print()
-	print(urlb64encode(string))
-	print(urlb64decode(urlb64encode(string)))
-	print()
-	print(fhtmlencode(string))
-	print(htmldecode(string))
-
-	print(f"\\{hex(ord('j'))[1:]}")
-	# unicode
-	test = f"\\u00{hex(ord('javascript'))[2:]}"
-	# ord
-	print(f"\\{oct(ord('javascript'))[2:]}")
-	print(urlencode(crlf))
-
+	print(rps.tags("a"))
