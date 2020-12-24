@@ -1,3 +1,4 @@
+# Import built in libraries
 import urllib3
 from pathlib import Path
 from urllib.parse import (
@@ -5,31 +6,36 @@ from urllib.parse import (
 	urljoin,
 	urlencode as qurlencode,
 )
-# Import http libs
+
+## Import hashlib
+from hashlib import *
+# Import hmac
+import hmac
+
+# Import custom libraries 
+
+## Import http libs
 from .http.httpsession import HTTPSession
-from .http.parser import *
 
-# Import versions libs
-from .versions import (
+## Import versions libs
+from .parse.versions import (
 	version_regex, 
 	extract_version, 
 	extract_versions, 
 	Version as ver
 )
 
-from .files import load_list
+from .parse.http import *
+from .parse.files import loadlist
 
-'''
-from .encoder import *
-from .http import HTTPSession
-from .payloads import *
-from .versions import (
-	version_regex, 
-	extract_version, 
-	extract_versions, 
-	Version as ver
-)
-from .generator import *
-'''
+# Import generators
+from .generate.code import *
+from .generate.user import *
+
+# Import encoder
+from .encode import *
+
+# Import display utils
+from .display import Logger, progressbar
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)

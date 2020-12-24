@@ -2,7 +2,8 @@ import requests
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 import re
-from lxml import etree
+import lxml.html
+
 
 links_attributes = [
     "href",
@@ -17,7 +18,6 @@ links_attributes = [
     "icon",
     "manifest",
     "poster",
-    "srcset",
     "archive"
 ]
 
@@ -29,22 +29,28 @@ class HTTPResponse:
     It implements helpful methods to analyse http(s) response.
     """
     def __init__(self, response):
-        self._response = response
         parsed = urlparse(response.url)
-
+        #: Requests lib response
+        self._response = response
+        #: Response hostname
         self._host = "://".join([parsed.scheme, parsed.netloc])
+        #: Response page path (without hostname)
         self._path = parsed.path
+        #: Response status code
         self._code = response.status_code
-        self._xml = self._xmltree()
+        #: Response text as XML object
+        self._xml = self._xml()
+        #: Response text as BeautifulSoup object
+        self._soup = self._makesoup()
 
     def __getattr__(self, attr):
         orig_attr = getattr(self._response, attr)
         if callable(orig_attr):
             def hooked(*args, **kwargs):
                 result = orig_attr(*args, **kwargs)
-                # prevent wrapped object from becoming unwrapped
-                if result == self._response:
-                    return self
+                ## prevent wrapped object from becoming unwrapped
+                # if result == self._response:
+                #    return self
                 return result
             return hooked
         else:
@@ -66,27 +72,30 @@ class HTTPResponse:
         return self._path
 
     @property
-    def code(self):
-        """
+    def code(self) -> int:
+        """Shortest way to call status_code
         """
         return self._code
 
     @property
-    def isok(self):
-        """
+    def isok(self) -> bool:
+        """Indicates if status code is 200
         """
         return self.code == 200
 
     @property
-    def isforbid(self):
-        """
+    def isforbid(self) -> bool:
+        """Indicates if status code is 403
         """
         return self.code == 403
 
     @property
-    def exists(self):
+    def exists(self) -> bool:
         """Return True if the requested url exists but not necessarily 
         accessible, False otherwise.
+
+        Returns:
+            bool: True if url exists, false otherwise
         """
         url = self.url
         location = ""
@@ -95,21 +104,28 @@ class HTTPResponse:
             if location:
                 location = urlparse(location).path
                 url = urlparse(url).path
-        return self.code in (200, 401, 403) or location == "".join((url, "/"))
+        return self.code in (200, 403) or location == "".join((url, "/"))
 
     @property
     def delay(self):
         """Reteurn response time in seconds.
         """
-        self._response.elapsed.total_seconds()
+        return self._response.elapsed.total_seconds()
 
-    def _xmltree(self):
+    def _xml(self):
         """Converts response into an XML object
 
         Returns:
 
         """
-        return etree.HTML(self._response.content)
+        if self._response.text:
+            return lxml.html.fromstring(self._response.text)
+        return lxml.html.fromstring("<>")
+
+    def _makesoup(self):
+        """
+        """
+        return BeautifulSoup(self._response.text, "lxml")
 
     def xpath(self, query):
         """Excute xpath on xmltree
@@ -156,27 +172,50 @@ class HTTPResponse:
 
         for link in self.links():
             parsed = urlparse(link)
-            if (
-                parsed.path and 
-                (parsed.netloc == host or not parsed.netloc)
-            ):
+            if (parsed.path and (parsed.netloc == host or not parsed.netloc)):
                 paths.append(parsed.path)
         return paths
 
+    def form(self, **attrs):
+        """Get form input tag values from http.HTTPResonse
+
+        Args:
+            response (http.HTTPResonse): HTTP Response object
+            **attrs: BeautifulSoup attrs
+
+        Returns:
+            str, dict: form action and inputs dictionary ready to 
+                be send as POST HTTP request
+        """
+        form_dict = {}
+        form = self.tag("form", attrs=attrs)
+
+        for input_tag in form.findAll("input"):
+            if "name" in input_tag.attrs:
+                value = ""
+                if "value" in input_tag.attrs:
+                    value = input_tag["value"]
+                form_dict[input_tag["name"]] = value
+                
+        for textarea in form.findAll("textarea"):
+            if "name" in textarea.attrs:
+                form_dict[textarea["name"]] = textarea.text
+
+        return form["action"], form_dict
     
-    def search(self, regex: str):
+    def search(self, *regex):
         """Use regular expression to search expression in the response content.
         
         Args:
-            regex: regular(s) expression to use. 
+            regex: regular(s) expression to use.
+
+        Returns:
+            re.match: regular expression match
         """
-        if isinstance(regex, str):
-            return re.search(regex, self._response.text)
-        if isinstance(regex, list):
-            for r in regex:
-                match = re.search(r, self._response.text)
-                if match:               
-                    return match
+        for r in regex:
+            match = re.search(r, self._response.text)
+            if match:               
+                return match
 
 
     def findall(self, regex):
@@ -187,13 +226,9 @@ class HTTPResponse:
             regex: regular expression to use.
 
         Return:
-            list: 
+            list: regular expression results
         """
         return re.findall(regex, self._response.text)
-
-
-    def soup(self):
-        self._soup = BeautifulSoup(self._response.text, "lxml")
 
 
     def tag(self, *args, **kwargs):
@@ -202,13 +237,9 @@ class HTTPResponse:
         Args:
             tag: tag name to find.
         
-        Return:
-
+        Returns:
+            bs4.element.Tag: Tag matching
         """
-        try:
-            self._soup
-        except AttributeError:
-            raise SoupError("Call 'soup()' method first")
         return self._soup.find(*args, **kwargs)
 
 
@@ -218,24 +249,6 @@ class HTTPResponse:
             BeautifulSoup.findall args
 
         Returns:
-
+            list: tags matching
         """
-        try:
-            self._soup
-        except AttributeError:
-            raise SoupError("Call 'soup()' method first")
         return self._soup.findAll(*args, **kwargs)
-
-
-    def formdict(self, **attrs):
-        form_dict = {}
-        form = self.tag("form", attrs=attrs)
-
-        for inp in form.findAll("input"):
-            if "name" in inp.attrs:
-                form_dict[inp["name"]] = inp["value"]
-        for texa in form.findAll("textarea"):
-            if "name" in texa.attrs:
-                form_dict[texa["name"]] = texa.text
-
-        return form_dict

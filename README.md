@@ -6,17 +6,14 @@ It include all python library that can be useful, implements several new functio
 
 h4cktools was developped by a random pentester who loves python language <3
 
-The project is compatible with Windows and Unix based systems as is python.
+The project is compatible with Windows and Unix based systems.
 
 It is Web Pentest Oriented, it is not inclding pwntools and it does not have not the same purpose.
 
 ## Disclaimer
-
-Of course, this project is in not intended to be used for illegal purpose and h4cktools developers are in no way responsible for its use.
+This project is in not intended to be used for illegal purpose and h4cktools developers are in no way responsible for its use.
 
 ## Summary
-```bash
-```
 
 ## Install
 ```bash
@@ -24,12 +21,13 @@ $ pip3 install git+https://github.com/WhatTheSlime/h4cktools.git
 ```
 
 ## How to use
-h4cktools library has been developped for be used in a python prompt like IPython
-To use it just open your favorite python prompt and import all components of the library:
+h4cktools library has been developped for be used in a python prompt like [IPython](https://ipython.org/)
+
+To use it just open a python prompt and import all components of the library:
 ```python
 >>> from h4cktools import *
 ```
-Of course it can also be used in scripts but it is unrecommended to use h4tools for security reasons.
+Of course it can also be used in scripts but it is not recommended to use h4cktools in long-term project.
 
 ## HTTPSession
 HTTP library aims to execute HTTP requests and parse its content easily. It is override requests library to be use quicker and addapt it to pentesting
@@ -38,8 +36,6 @@ HTTP library aims to execute HTTP requests and parse its content easily. It is o
 ```python
 >>> s = HTTPSession()
 ```
-
-### Instantiate a session with a scope
 
 ### Navigate into a host
 #### Goto
@@ -64,6 +60,7 @@ When the *host* is set, you can navigate into the host using local path:
 ```python
 >>> s.goto("/webph")
 <[200] https://www.google.com/webhp>
+
 >>> s.goto("webph")
 <[200] https://www.google.com/webhp>
 ```
@@ -82,16 +79,24 @@ Note that redirection following is disable by default. When a response must redi
 ```python
 >>> s.goto("https://google.com")
 <[301] https://google.com/>
+
 >>> s.follow()
 <[200] https://www.google.com/>
 ```
 
 #### Web tree navigation
 
-Goin and Goout methods allow you to navigate in web tree, similar to cd <Local_Path> and cd ../ unix commands:
+*goin* and *goout* methods allow you to navigate in web tree, similar to cd <Local_Path> and cd ../ unix commands:
 ```python
->>> s.goto("")
->>> s.goin("")
+>>> s.goto("https://google.com")
+<[200] https://www.google.com/>
+
+>>> s.goto("search")
+<[302] https://www.google.com/search>
+
+>>> s.follow()
+<[200] https://www.google.com/webhp>
+
 >>> s.goout()
 <[200] https://www.google.com/>
 ```
@@ -100,6 +105,7 @@ To check your current path, simply check the *page* attribute or, if you only wa
 ```python
 >>> s.goto("https://www.google.com")
 <[200] https://www.google.com/>
+
 >>> s.page
 <[200] https://www.google.com/>
 >>> s.page.path
@@ -110,7 +116,7 @@ To check your current path, simply check the *page* attribute or, if you only wa
 
 HTTPSession keep visited pages as a browser, historic is cached in hist attribute:
 ```python
->>> s.goto("https://google.com")                                                                    
+>>> s.goto("https://google.com")
 <[301] https://google.com/>
 >>> s.follow()                                                                                      
 <[200] https://www.google.com/>
@@ -139,49 +145,43 @@ In fact, if you try to do it, it will not return send a request and not return a
 ```
 Return of get method is a prepared request as asyncio Future object.
 
-To send this request you need to call the *send* method:
+To send this request you need to call await the task:
 ```python
->>> rq = s.get("https://www.google.com")
->>> s.sendall(rq)
+>>> await s.get("https://www.google.com")
 [<[200] https://www.google.com/>]
->>> s.sendall(s.get("https://www.google.com"))
+```
+
+Or use the *run* method:
+```python
+>>> s.run(s.get("https://www.google.com"))
 [<[200] https://www.google.com/>]
 ```
 
 Futures object allow you to send requests concurrently:
 ```python
->>>rqs = [s.get(f"https://www.google.com/{i}") for i in range(1, 10)]
->>>s.sendall(*rqs)
-[<[404] https://www.google.com/7>, <[404] https://www.google.com/1>, <[404] https://www.google.com/3>, <[404] https://www.google.com/5>, <[404] https://www.google.com/2>, <[404] https://www.google.com/8>, <[404] https://www.google.com/4>, <[404] https://www.google.com/9>, <[404] https://www.google.com/6>]
+>>> rqs = [s.get(f"https://www.google.com/{i}") for i in range(1, 5)]
+>>> s.run(*rqs)
+[<[404] https://google.com/4>,
+ <[404] https://google.com/0>,
+ <[404] https://google.com/1>,
+ <[404] https://google.com/2>,
+ <[404] https://google.com/3>]
 ```
 
-If you want to use specific actions on each response, it is also possible by declaring functions with async syntaxe
+If you want to use specific actions on each response, it is also possible by declaring functions with async syntax
 ```python
->>> async def check(i):
-...     r = await s.get(f"https://www.google.com/{i}", allow_redirects=False)
-...     return r if r.isok else None
-...
->>> for p in s.sendall(*[check(i) for i in range(0, 10)]):
-TOCOMPLETE
+TODO
 ```
 
 You can define worker number at HTTPSession initialization or after:
 ```python
->>> s = HTTPSession(workers=10)
+>>> s = HTTPSession(workers=5)
 >>> s.workers = 5
 ```
 
 Note that doing requests in this way will note populate the history and set current page of th HTTPSession.
 
 ### Responses Parsing
-
-### They see me crawlin'
-Pages contains local paths, it will be stupid to not be able to crawl it easily ;)
-
-Just use *crawl* method, it will start to crawl for current path:
-```python
->>> rs = s.crawl() 
-```
 
 ## Encoder
 

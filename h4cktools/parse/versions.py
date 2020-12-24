@@ -1,35 +1,36 @@
-"""
-"""
 import re
 
 #: Regular expression that match a version
 version_regex = r"((?:\d+\.)+\d+)"
 
-#: Regular expression that match a version by specifying
-format_version_regex = "((?:\d+\.){}\d+)"
+#: Regular expression that match a version by specifying its length
+f_version_regex = r"((?:\d+\.){}\d+)"
 
-def extract_version(text: str, numbers=1):
+
+def extract_version(text: str, quantifier: int = 1):
     """Extract version from a string.
 
     Args:
         text (str): Text that contains a version.
 
     Keywords:
-        numbers (int): number of numbers expected in the version
-            if 1, it will get {n} numbers
+        quantifier (int): number of numbers expected in the version
+            if 1 (default), it will get between 2 and unlimited numbers
+            if greater than 1, it will get exact number numbers
 
     Returns:
         Version: Version if found, None otherwise
     """
     #: Regular expression quantifier
     q = "+"
-    if numbers > 1:
-        q = str(numbers - 1).join(["{{", "}}"])
-    elif numbers < 1:
+    if quantifier > 1:
+        q = str(quantifier - 1).join(["{", "}"])
+    elif quantifier < 1:
         raise ValueError("Qunatifier must be a positive not null integer")
-
-    match = re.search(format_version_regex.format(q), text)
+    
+    match = re.search(f_version_regex.format(q), text)
     return Version(match.group(1)) if match else None
+
 
 def extract_versions(text: str) -> list:
     """Extract versions from a string.
@@ -38,15 +39,16 @@ def extract_versions(text: str) -> list:
         text (str): Text that contains a version.
 
     Returns:
-        list: list of found Versions
+        list: list of founded versions
     """
     versions = re.findall(version_regex, text)
-    return [Version(v[0]) for v in versions]
+    return [Version(v) for v in versions]
 
 
 class Version:
-    """Object parsing versions"""
+    """Object parsing version number"""
     def __init__(self, version: str):
+        #: List of numbers in version
         self.nums = [int(n) for n in version.split(".")]
 
     def __eq__(self, other) -> bool:

@@ -14,7 +14,6 @@ from urllib.parse import (
 )
 
 ## Encoding
-
 def b64encode(obj: Union[str, bytes], encoding="utf-8") -> str:
     """Base64 encode characters of a string 
 
@@ -30,7 +29,7 @@ def b64encode(obj: Union[str, bytes], encoding="utf-8") -> str:
     return _b64encode(_obj).decode(encoding)
 
 
-def hexencode(s: str) -> str:
+def hexencode(s: str, p: str = "\\x") -> str:
     """Hexadecimal encode all characters of a string 
 
     Args:
@@ -39,7 +38,7 @@ def hexencode(s: str) -> str:
     Returns:
         str: encoded string
     """
-    return "".join(f"\\{hex(ord(c))[1:]}" for c in s)
+    return "".join(f"{p}{hex(ord(c))[2:]}" for c in s)
 
 
 def uhexencode(s: str) -> str:
@@ -89,10 +88,7 @@ def urlb64encode(obj: Union[str, bytes], encoding="utf-8") -> str:
     Returns:
         str: encoded string
     """
-    _obj = obj
-    if not isinstance(obj, bytes):
-        _obj = str(obj).encode(encoding)
-    return urlsafe_b64encode(_obj).decode(encoding)
+    return b64encode(urlencode(obj, encoding=encoding), encoding=encoding)
 
 
 def furlencode(s: str) -> str:
@@ -104,9 +100,7 @@ def furlencode(s: str) -> str:
     Returns:
         str: encoded string
     """
-    return "".join("%{0:0>2}".format(
-        format(ord(c), "x")) for c in s
-    )
+    return "".join("%{0:0>2}".format(format(ord(c), "x")) for c in s)
 
 
 def durlencode(s: str) -> str:
@@ -197,13 +191,12 @@ def urlb64decode(obj: Union[str, bytes], encoding="utf-8") -> str:
     _obj = obj
     if not isinstance(obj, bytes):
         _obj = str(obj).encode(encoding)
-    return urlsafe_b64decode(_obj).decode(encoding)
+    return b64decode(urldecode(obj))
 
-def hexdecode(s: str):
-    return bytes.fromhex(s).decode("ASCII")
 
 def autodecode(string: str) -> str:
     """Detect the string encoding and try to decode
+    TODO
 
     Args:
         s: string to decode
@@ -211,5 +204,4 @@ def autodecode(string: str) -> str:
     Returns:
         str: decoded string
     """
-    # TODO
-    return
+    pass
