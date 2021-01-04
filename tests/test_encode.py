@@ -32,7 +32,7 @@ def test_hexencode():
     assert hexencode("test") == "\\x74\\x65\\x73\\x74"
 
 def test_uhexencode():
-    assert uhexencode("test") == "\\u0074\\u0065\\u0073\\u0074"
+    assert uhexencode("test") == "%u0074%u0065%u0073%u0074"
 
 def test_octencode():
     assert octencode("test") == "\\0o164\\0o145\\0o163\\0o164"

@@ -50,7 +50,7 @@ def uhexencode(s: str) -> str:
     Returns:
         str: encoded string
     """
-    return "".join(f"\\u00{hex(ord(c))[2:]}" for c in s)
+    return "".join(f"%u00{hex(ord(c))[2:]}" for c in s)
 
     
 def octencode(s: str) -> str:
