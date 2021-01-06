@@ -44,8 +44,7 @@ class HTTPSession(AsyncSession):
         self.host = host
         self.verify = verify
         self.delay = delay
-        if proxies:
-            self.proxies = proxies
+        self.proxies = proxies
     
 
     @property

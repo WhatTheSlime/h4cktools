@@ -19,5 +19,9 @@ setup(
         "requests==2.23.0",
         "beautifulsoup4==4.9.3"
     ],
-    tests_require = ["pytest==6.1.2"]
+    tests_require = [
+        "pytest==6.1.2",
+        "pytest-asyncio",
+        "pytest-cov",
+    ]
 )

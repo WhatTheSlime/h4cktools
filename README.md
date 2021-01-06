@@ -1,5 +1,7 @@
 # h4cktools
 
+[![PyPI Version](https://img.shields.io/pypi/v/h4cktools.svg)](https://pypi.python.org/pypi/h4cktools/)
+
 ## Purpose
 h4cktools is a python library containing usefull helpers for penetration testing and security challenges.
 It include all python library that can be useful, implements several new functions ond objects and add shorcuts for functions and payloads.

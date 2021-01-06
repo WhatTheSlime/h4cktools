@@ -6,7 +6,7 @@ h4cktools_path = os.path.abspath(
 )
 sys.path.append(h4cktools_path)
 
-from h4cktools.display import Logger, progressbar
+from h4cktools.display import Logger
 
 def test_logger(tmp_path):
     d = tmp_path / "sub"
@@ -21,6 +21,3 @@ def test_logger(tmp_path):
     logger.debug("debug")
     logger.warning("warning")
     logger.error("error")
-
-def test_progressbar():
-    progressbar(percent=True, timer=True, eta=True)
