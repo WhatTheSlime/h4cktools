@@ -1,6 +1,10 @@
 from random import randint, choice
 from string import ascii_lowercase, ascii_uppercase, digits, punctuation
 
+
+__all__ = ["password"]
+
+
 def password(
     length: int = 20, punc: str = punctuation
 ) -> str:

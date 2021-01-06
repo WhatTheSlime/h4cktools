@@ -1,10 +1,16 @@
 import asyncio
 import time
+import urllib3
 from urllib.parse import urlparse, urljoin
 from concurrent.futures import ThreadPoolExecutor
 
 from .asyncsession import AsyncSession
 from .httpresponse import HTTPResponse
+
+
+__all__ = ["HTTPSession"]
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 USERAGENT = (
     "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:78.0) "
@@ -28,7 +34,7 @@ class HTTPSession(AsyncSession):
         workers: int = 5,
         verify: bool = False,
         delay: int = 0,
-        proxies: dict = {}
+        proxies: dict = None
     ):
         super(HTTPSession, self).__init__(loop=loop, workers=workers)
         self.hist = []
@@ -38,7 +44,8 @@ class HTTPSession(AsyncSession):
         self.host = host
         self.verify = verify
         self.delay = delay
-        self.proxies = proxies
+        if proxies:
+            self.proxies = proxies
     
 
     @property

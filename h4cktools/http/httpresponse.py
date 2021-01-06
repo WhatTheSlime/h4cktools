@@ -5,6 +5,9 @@ import re
 import lxml.html
 
 
+__all__ = ["HTTPResponse"]
+
+
 links_attributes = [
     "href",
     "codebase",
@@ -116,14 +119,17 @@ class HTTPResponse:
         """Converts response into an XML object
 
         Returns:
-
+            : parsed content
         """
         if self._response.text:
             return lxml.html.fromstring(self._response.text)
         return lxml.html.fromstring("<>")
 
     def _makesoup(self):
-        """
+        """Parse HTTP response body as BeautifulSoup objcect
+
+        Returns:
+            bs4.BeautifulSoup: parsed content
         """
         return BeautifulSoup(self._response.text, "lxml")
 
@@ -141,19 +147,24 @@ class HTTPResponse:
         """Return all src values of scripts in content page
 
         Returns:
-
+            list: list of content scripts
         """
         soup = BeautifulSoup(self._response.text, "lxml")
-        scripts = [script.prettify() for script in soup.findAll("script")]
-        return scripts
+        return [script.prettify() for script in soup.findAll("script")]
 
     def srcs(self):
         """Return all src values in content page
+
+        Returns:
+            list: findings list
         """
         return self.xpath("//@src")
 
-
-    def links(self):
+    def links(self) -> list:
+        """
+        Returns:
+            list: findings list
+        """
         links = set()
         for attr in links_attributes:
             for link in self.xpath(f"//@{attr}"):
@@ -162,10 +173,10 @@ class HTTPResponse:
 
     
     def paths(self) -> list:
-        """Find all host paths in the page
+        """Find paths internal to the website in response body
 
         Returns:
-            list: host paths
+            list: findings list
         """
         paths = []
         host = urlparse(self.host).netloc
@@ -190,13 +201,15 @@ class HTTPResponse:
         form_dict = {}
         form = self.tag("form", attrs=attrs)
 
+        # Exctracting inputs
         for input_tag in form.findAll("input"):
             if "name" in input_tag.attrs:
                 value = ""
                 if "value" in input_tag.attrs:
                     value = input_tag["value"]
                 form_dict[input_tag["name"]] = value
-                
+
+        # Exctracting textareas        
         for textarea in form.findAll("textarea"):
             if "name" in textarea.attrs:
                 form_dict[textarea["name"]] = textarea.text

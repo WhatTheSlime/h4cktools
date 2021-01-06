@@ -1,9 +1,20 @@
 import re
 
+
+__all__ = [
+    "version_regex", 
+    "f_version_regex", 
+    "extract_version", 
+    "extract_versions",
+    "Version"
+]
+
+
 #: Regular expression that match a version
 version_regex = r"((?:\d+\.)+\d+)"
 
 #: Regular expression that match a version by specifying its length
+#: e.g. f_version_regex.format(2)
 f_version_regex = r"((?:\d+\.){}\d+)"
 
 

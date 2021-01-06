@@ -5,6 +5,9 @@ from concurrent.futures import ThreadPoolExecutor
 from functools import partial
 
 
+__all__ = ["AsyncSession"]
+
+
 class AsyncSession(requests.Session):
     """request.Session wrapper to make asynchronous requests
     """

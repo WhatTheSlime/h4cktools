@@ -13,6 +13,25 @@ from urllib.parse import (
     unquote_plus
 )
 
+__all__ = [
+    "b64encode",
+    "hexencode",
+    "uhexencode",
+    "octencode",
+    "urlencode",
+    "urlb64encode",
+    "furlencode",
+    "durlencode",
+    "htmlencode",
+    "fhtmlencode",
+
+    "b64decode",
+    "htmldecode",
+    "urldecode",
+    "urlb64decode",
+    "autodecode"
+]
+
 ## Encoding
 def b64encode(obj: Union[str, bytes], encoding="utf-8") -> str:
     """Base64 encode characters of a string 

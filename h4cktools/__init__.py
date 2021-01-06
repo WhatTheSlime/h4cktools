@@ -1,20 +1,12 @@
-# Import built in libraries
-import urllib3
-from pathlib import Path
-from urllib.parse import (
-	urlparse,
-	urljoin,
-	urlencode as qurlencode,
-)
+#!/usr/bin/env python3
+ 
+"""h4cktools is a library containing usefull helpers for penetration testing
+and security challenges. It implements several functions ond objects and add 
+shorcuts for functions and payloads.
+"""
 
-## Import hashlib
-from hashlib import *
-# Import hmac
-import hmac
 
-# Import custom libraries 
-
-## Import http libs
+# Import http libs
 from .http.httpsession import HTTPSession
 
 ## Import versions libs
@@ -36,6 +28,4 @@ from .generate.user import *
 from .encode import *
 
 # Import display utils
-from .display import Logger, progressbar
-
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+from .display import Logger

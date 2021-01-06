@@ -1,36 +1,41 @@
-# H4ckTools
+# h4cktools
 
 ## Purpose
-h4cktools is a library containing usefull helpers for penetration testing, security challenges and CTF.
+h4cktools is a python library containing usefull helpers for penetration testing and security challenges.
 It include all python library that can be useful, implements several new functions ond objects and add shorcuts for functions and payloads.
-
-h4cktools was developped by a random pentester who loves python language <3
 
 The project is compatible with Windows and Unix based systems.
 
-It is Web Pentest Oriented, it is not inclding pwntools and it does not have not the same purpose.
+It is Web Pentest Oriented, it is not inclding [pwntools](https://pypi.org/project/pwntools/) and it does not have not the same purpose.
 
 ## Disclaimer
-This project is in not intended to be used for illegal purpose and h4cktools developers are in no way responsible for its use.
+This project is in not intended to be used for illegal purpose and h4cktools developers are in no way responsible for its use etc...
 
 ## Summary
+- [How to install](#installation)
+- [How to Use](#usage)
 
-## Install
+## Installation
+Install from pip
 ```bash
-$ pip3 install git+https://github.com/WhatTheSlime/h4cktools.git
+$ pip install h4cktools
 ```
 
-## How to use
-h4cktools library has been developped for be used in a python prompt like [IPython](https://ipython.org/)
+Install from github
+```bash
+$ pip install git+https://github.com/WhatTheSlime/h4cktools.git
+```
+
+## Usage
+h4cktools library has been developped for be used in a python prompt like [IPython](https://ipython.org/).
 
 To use it just open a python prompt and import all components of the library:
 ```python
 >>> from h4cktools import *
 ```
-Of course it can also be used in scripts but it is not recommended to use h4cktools in long-term project.
 
 ## HTTPSession
-HTTP library aims to execute HTTP requests and parse its content easily. It is override requests library to be use quicker and addapt it to pentesting
+HTTP library aims to execute HTTP requests and parse its content easily. It overrides [requests library](https://requests.readthedocs.io/en/master/) to be quicker and addapted to pentesting.
 
 ### Initialization:
 ```python
@@ -68,11 +73,15 @@ When the *host* is set, you can navigate into the host using local path:
 Scope can also be initialize at HTTPSession declaration or set after without doing any requests:
 ```python
 >>> s = HTTPSession("https://www.google.com")
+
 >>> s.host
 'https://www.google.com'
+
 >>> s.host = "https://facebook.com"
+
 >>> s.host
 'https://facebook.com'
+
 ```
 
 Note that redirection following is disable by default. When a response must redirect, you can use *follow* method to go on:
@@ -82,23 +91,27 @@ Note that redirection following is disable by default. When a response must redi
 
 >>> s.follow()
 <[200] https://www.google.com/>
+
 ```
 
 #### Web tree navigation
 
-*goin* and *goout* methods allow you to navigate in web tree, similar to cd <Local_Path> and cd ../ unix commands:
+*goin* and *goout* methods allow you to navigate in web tree, similar to **cd <Local_Path>** and cd ../ unix commands (but using goin with a paramater starting with a / will not bring you to the url root):
 ```python
->>> s.goto("https://google.com")
-<[200] https://www.google.com/>
+>>> s = HTTPSession("https://www.google.com")
 
 >>> s.goto("search")
+<[302] https://www.google.com/search>
+
+>>> s.goin("test") # or s.goin("/test")
+<[404] https://www.google.com/search/test>
+
+>>> s.goout()
 <[302] https://www.google.com/search>
 
 >>> s.follow()
 <[200] https://www.google.com/webhp>
 
->>> s.goout()
-<[200] https://www.google.com/>
 ```
 
 To check your current path, simply check the *page* attribute or, if you only want the path, use the page.path attribute:
@@ -108,8 +121,10 @@ To check your current path, simply check the *page* attribute or, if you only wa
 
 >>> s.page
 <[200] https://www.google.com/>
+
 >>> s.page.path
 '/'
+
 ```
 
 #### Historic
@@ -168,11 +183,6 @@ Futures object allow you to send requests concurrently:
  <[404] https://google.com/3>]
 ```
 
-If you want to use specific actions on each response, it is also possible by declaring functions with async syntax
-```python
-TODO
-```
-
 You can define worker number at HTTPSession initialization or after:
 ```python
 >>> s = HTTPSession(workers=5)
@@ -182,6 +192,16 @@ You can define worker number at HTTPSession initialization or after:
 Note that doing requests in this way will note populate the history and set current page of th HTTPSession.
 
 ### Responses Parsing
+Every requests method of **HTTPSession** will return an **HTTPResponse** object and store it in the **page** attribute:
+```python
+>>> r = s.goto("search")
+
+>>> s.page
+>>> <[302] https://www.google.com/search>
+```
+
+The HTTPResponse Object is a wrapper of **requests.Response** object and add new attributes and methods.
+
 
 ## Encoder
 

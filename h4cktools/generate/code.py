@@ -5,6 +5,11 @@ from pathlib import Path
 from subprocess import call
 
 
+__all__ = [
+    "randnum", "phpserialize", "phpwebshell", "jspwebshell", "warwebshell"
+]
+
+
 def randnum(length: int) -> str:
     """Generate random number of certain length.
     It can generate numbers starting with 0.
@@ -72,10 +77,10 @@ def phpserialize(obj, null_byte: str = "\0") -> str:
             elif k.startswith("_"):
                 nk = "".join([null_byte, "*", null_byte, k[1:]])
 
+            
             s = phpserialize(nk).join([s, phpserialize(v)])
-
+            
         return s.join([f"O:{len(n)}:\"{n}\":{len(attrs)}:{{", "}"])
-    # raise TypeError(f"{type(obj)} not serializable")
 
 
 def phpwebshell(password: str = "", command="echo shell_exec") -> str:

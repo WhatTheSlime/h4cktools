@@ -3,6 +3,10 @@ from pathlib import Path
 import zipfile
 import tarfile
 
+
+__all__ = ["loadlist"]
+
+
 def loadlist(
     file_path: str, 
     separator: str = "", 
