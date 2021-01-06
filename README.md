@@ -1,5 +1,6 @@
 # h4cktools
 
+[![Build Status](https://travis-ci.com/WhatTheSlime/h4cktools.svg?token=UzY5CygRhRpeZibSxKUz&branch=master)](https://travis-ci.com/WhatTheSlime/h4cktools)
 [![PyPI Version](https://img.shields.io/pypi/v/h4cktools.svg)](https://pypi.python.org/pypi/h4cktools/)
 
 ## Purpose
