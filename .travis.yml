@@ -6,7 +6,7 @@ python:
   - "3.9"
 # command to install dependencies
 install:
-  - pip install .
+  - pip install ".[tests]"
 # command to run tests
 script:
   - pytest --cov=h4cktools
