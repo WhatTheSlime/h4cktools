@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="h4cktools",
-    version="0.0.1",
+    version="0.0.2",
     description="h4cktools is a python library containing usefull helpers "
     "for penetration testing and security challenges.",
     url="https://github.com/WhatTheSlime/h4cktools",

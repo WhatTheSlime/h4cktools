@@ -1,4 +1,3 @@
-import logging
 import os
 
 
@@ -16,64 +15,95 @@ class Logger:
             with open(self.filename, 'w') as f: 
                 f.write("")
 
-    def info(self, msg):
-        """
-        """
-        self._log(f"[*] {msg}")
+    def info(self, msg: str):
+        """Log information
 
-    def success(self, msg):
+        Args:
+            msg (str): message to log
         """
-        """
-        _msg = f"[+] {msg}"
+        pre = "[.]"
         if self.colors:
-            _msg = _msg.join(["\033[32m", "\033[0m"])
-        self._log(_msg)
+            pre = f"\033[2;1m{pre}\033[0m"
+        self._log(" ".join([pre, msg]))
 
-    def partial(self, msg):
-        """
-        """
-        if self.verbosity >= 1:
-            _msg = f"[-] {msg}"
-            if self.colors:
-                _msg = _msg.join(["\033[36m", "\033[0m"])
-            self._log(_msg)
+    def success(self, msg: str):
+        """Log a success
 
-    def fail(self, msg):
+        Args:
+            msg (str): message to log
         """
-        """
-        if self.verbosity >= 2:
-            _msg = f"[.] {msg}"
-            if self.colors:
-                _msg = _msg.join(["\033[34m", "\033[0m"])
-            self._log(_msg)
+        pre = "[+]"
+        if self.colors:
+            pre = f"\033[32;1m{pre}\033[0m"
+        self._log(" ".join([pre, msg]))
 
-    def debug(self, msg):
+    def partial(self, msg: str):
+        """Log a partial success
+
+        Args:
+            msg (str): message to log
         """
+        pre = "[/]"
+        if self.colors:
+            pre = f"\033[94;1m{pre}\033[0m"
+        self._log(" ".join([pre, msg]))
+
+    def fail(self, msg: str):
+        """Log a fail
+
+        Args:
+            msg (str): message to log
         """
-        if self.verbosity >= 3:
-            _msg = f"[=] {msg}"
+        pre = "[-]"
+
+        if self.colors:
+            pre = f"\033[34;1m{pre}\033[0m"
+        self._log(" ".join([pre, msg]))
+
+    def verbose(self, msg: str, v: int = 1):
+        """Log an additional information
+        
+        Args:
+            msg (str): message to log
+        Keywords:
+            v (int): message verbosity number
+        """
+        if v < 1:
+            raise ValueError(f"v keyword must be greater than 1")
+
+        if self.verbosity >= v:
+            pre = ("v"*v).join(["[", "]"])
             if self.colors:
-                _msg = _msg.join(["\033[2;37m", "\033[0m"])
-            self._log(_msg)
+                pre = f"\033[90;1m{pre}\033[0m"
+            self._log(" ".join([pre, msg]))
 
     def warning(self, msg):
+        """Log a warning
+
+        Args:
+            msg (str): message to log
         """
-        """
-        _msg = f"[Warning] {msg}"
+        pre = "[warning]"
         if self.colors:
-            _msg = _msg.join(["\033[33m", "\033[0m"])
-        self._log(_msg)
+            pre = f"\033[33m{pre}\033[0m"
+        self._log(" ".join([pre, msg]))
 
     def error(self, msg):
-        """
-        """
-        _msg = f"[Error] {msg}"
-        if self.colors:
-            _msg = _msg.join(["\033[31m", "\033[0m"])
-        self._log(_msg)
+        """Log an error
 
-    def _log(self, msg):
+        Args:
+            msg (str): message to log
         """
+        pre = "[error]"
+        if self.colors:
+            pre = f"\033[31m{pre}\033[0m"
+        self._log(" ".join([pre, msg]))
+
+    def _log(self, msg: str):
+        """Print message and write it in a file
+
+        Args:
+            msg (str): message to log
         """
         if self.filename:
             with open(self.filename, "a") as f:
