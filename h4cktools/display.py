@@ -6,13 +6,14 @@ __all__ = ["Logger"]
 
 class Logger:
     """Simple Logger Object"""
+
     def __init__(self, filename=None, colors=True, verbosity=0):
         self.filename = filename
         self.colors = colors
         self.verbosity = verbosity
 
         if self.filename:
-            with open(self.filename, 'w') as f: 
+            with open(self.filename, "w") as f:
                 f.write("")
 
     def info(self, msg: str):
@@ -62,7 +63,7 @@ class Logger:
 
     def verbose(self, msg: str, v: int = 1):
         """Log an additional information
-        
+
         Args:
             msg (str): message to log
         Keywords:
@@ -72,7 +73,7 @@ class Logger:
             raise ValueError(f"v keyword must be greater than 1")
 
         if self.verbosity >= v:
-            pre = ("v"*v).join(["[", "]"])
+            pre = ("v" * v).join(["[", "]"])
             if self.colors:
                 pre = f"\033[90;1m{pre}\033[0m"
             self._log(" ".join([pre, msg]))

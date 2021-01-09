@@ -2,11 +2,11 @@ import re
 
 
 __all__ = [
-    "version_regex", 
-    "f_version_regex", 
-    "extract_version", 
+    "version_regex",
+    "f_version_regex",
+    "extract_version",
     "extract_versions",
-    "Version"
+    "Version",
 ]
 
 
@@ -38,7 +38,7 @@ def extract_version(text: str, quantifier: int = 1):
         q = str(quantifier - 1).join(["{", "}"])
     elif quantifier < 1:
         raise ValueError("Qunatifier must be a positive not null integer")
-    
+
     match = re.search(f_version_regex.format(q), text)
     return Version(match.group(1)) if match else None
 
@@ -58,6 +58,7 @@ def extract_versions(text: str) -> list:
 
 class Version:
     """Object parsing version number"""
+
     def __init__(self, version: str):
         #: List of numbers in version
         self.nums = [int(n) for n in version.split(".")]
@@ -89,4 +90,3 @@ class Version:
 
     def __repr__(self) -> str:
         return ".".join([str(num) for num in self.nums])
-        

@@ -1,8 +1,8 @@
+import lxml.html
 import requests
+import re
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
-import re
-import lxml.html
 
 
 __all__ = ["HTTPResponse"]
@@ -21,16 +21,19 @@ links_attributes = [
     "icon",
     "manifest",
     "poster",
-    "archive"
+    "archive",
 ]
+
 
 class SoupError(Exception):
     pass
+
 
 class HTTPResponse:
     """The class is a wrapper for requests.models.Response class.
     It implements helpful methods to analyse http(s) response.
     """
+
     def __init__(self, response):
         parsed = urlparse(response.url)
         #: Requests lib response
@@ -49,12 +52,14 @@ class HTTPResponse:
     def __getattr__(self, attr):
         orig_attr = getattr(self._response, attr)
         if callable(orig_attr):
+
             def hooked(*args, **kwargs):
                 result = orig_attr(*args, **kwargs)
                 ## prevent wrapped object from becoming unwrapped
                 # if result == self._response:
                 #    return self
                 return result
+
             return hooked
         else:
             return orig_attr
@@ -64,37 +69,32 @@ class HTTPResponse:
 
     @property
     def host(self):
-        """
-        """
+        """"""
         return self._host
 
     @property
     def path(self):
-        """
-        """
+        """"""
         return self._path
 
     @property
     def code(self) -> int:
-        """Shortest way to call status_code
-        """
+        """Shortest way to call status_code"""
         return self._code
 
     @property
     def isok(self) -> bool:
-        """Indicates if status code is 200
-        """
+        """Indicates if status code is 200"""
         return self.code == 200
 
     @property
     def isforbid(self) -> bool:
-        """Indicates if status code is 403
-        """
+        """Indicates if status code is 403"""
         return self.code == 403
 
     @property
     def exists(self) -> bool:
-        """Return True if the requested url exists but not necessarily 
+        """Return True if the requested url exists but not necessarily
         accessible, False otherwise.
 
         Returns:
@@ -111,8 +111,7 @@ class HTTPResponse:
 
     @property
     def delay(self):
-        """Reteurn response time in seconds.
-        """
+        """Reteurn response time in seconds."""
         return self._response.elapsed.total_seconds()
 
     def _xml(self):
@@ -134,13 +133,11 @@ class HTTPResponse:
         return BeautifulSoup(self._response.text, "lxml")
 
     def xpath(self, query):
-        """Excute xpath on xmltree
-        """
+        """Excute xpath on xmltree"""
         return self._xml.xpath(query)
 
     def hrefs(self):
-        """Return all href values links in content page.
-        """
+        """Return all href values links in content page."""
         return self.xpath("//@href")
 
     def scripts(self):
@@ -171,7 +168,6 @@ class HTTPResponse:
                 links.add(link)
         return list(links)
 
-    
     def paths(self) -> list:
         """Find paths internal to the website in response body
 
@@ -183,7 +179,7 @@ class HTTPResponse:
 
         for link in self.links():
             parsed = urlparse(link)
-            if (parsed.path and (parsed.netloc == host or not parsed.netloc)):
+            if parsed.path and (parsed.netloc == host or not parsed.netloc):
                 paths.append(parsed.path)
         return paths
 
@@ -195,7 +191,7 @@ class HTTPResponse:
             **attrs: BeautifulSoup attrs
 
         Returns:
-            str, dict: form action and inputs dictionary ready to 
+            str, dict: form action and inputs dictionary ready to
                 be send as POST HTTP request
         """
         form_dict = {}
@@ -209,16 +205,16 @@ class HTTPResponse:
                     value = input_tag["value"]
                 form_dict[input_tag["name"]] = value
 
-        # Exctracting textareas        
+        # Exctracting textareas
         for textarea in form.findAll("textarea"):
             if "name" in textarea.attrs:
                 form_dict[textarea["name"]] = textarea.text
 
         return form["action"], form_dict
-    
+
     def search(self, *regex):
         """Use regular expression to search expression in the response content.
-        
+
         Args:
             regex: regular(s) expression to use.
 
@@ -227,14 +223,13 @@ class HTTPResponse:
         """
         for r in regex:
             match = re.search(r, self._response.text)
-            if match:               
+            if match:
                 return match
 
-
     def findall(self, regex):
-        """Use regular expression to find all match of an expression in the 
+        """Use regular expression to find all match of an expression in the
         response content.
-        
+
         Args:
             regex: regular expression to use.
 
@@ -243,18 +238,16 @@ class HTTPResponse:
         """
         return re.findall(regex, self._response.text)
 
-
     def tag(self, *args, **kwargs):
         """Return http response searched tags.
-        
+
         Args:
             tag: tag name to find.
-        
+
         Returns:
             bs4.element.Tag: Tag matching
         """
         return self._soup.find(*args, **kwargs)
-
 
     def tags(self, *args, **kwargs):
         """Return http response searched tags

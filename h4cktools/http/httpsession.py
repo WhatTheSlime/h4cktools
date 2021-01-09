@@ -20,12 +20,13 @@ USERAGENT = (
 
 class LocalPathException(Exception):
     """Raised when path is local and host is not defined"""
+
     pass
 
 
 class HTTPSession(AsyncSession):
-    """Psoeudo browser to make requests easier and faster.
-    """
+    """AsyncSession Override that make it easier and faster tu use."""
+
     def __init__(
         self,
         host: str = "",
@@ -34,7 +35,7 @@ class HTTPSession(AsyncSession):
         workers: int = 5,
         verify: bool = False,
         delay: int = 0,
-        proxies: dict = None
+        proxies: dict = None,
     ):
         super(HTTPSession, self).__init__(loop=loop, workers=workers)
         self.hist = []
@@ -45,29 +46,23 @@ class HTTPSession(AsyncSession):
         self.verify = verify
         self.delay = delay
         self.proxies = proxies
-    
 
     @property
     def agent(self) -> str:
-        """User-Agent property
-        """
+        """User-Agent property"""
         return self.headers["User-Agent"]
-
 
     @agent.setter
     def agent(self, user_agent: str):
         self.headers["User-Agent"] = user_agent
 
-
     @property
     def workers(self) -> int:
         return self.thread_pool._max_workers
-    
 
     @workers.setter
     def workers(self, max_workers: int):
         self.thread_pool = ThreadPoolExecutor(max_workers=max_workers)
-
 
     async def request(self, method: str, url: str, redirects=False, **kwargs):
         parsed = urlparse(url)
@@ -81,9 +76,9 @@ class HTTPSession(AsyncSession):
                     "Path must be global if host has not been set "
                     "(e.g. http://test.com/test)"
                 )
-        if "allow_redirects"in kwargs.keys():
+        if "allow_redirects" in kwargs.keys():
             del kwargs["allow_redirects"]
-            
+
         return HTTPResponse(
             await super().request(
                 method, url, allow_redirects=redirects, **kwargs
@@ -94,26 +89,24 @@ class HTTPSession(AsyncSession):
         """Go to new url and set it as new host
 
         Args:
-            url (str): 
+            url (str):
         Returns:
-            HTTPResponse: 
+            HTTPResponse:
         """
         self.page = self.run(self.get(url, allow_redirects=False))[0]
         self.hist.append(self.page)
         self.page_index = len(self.hist) - 1
         # Set host attribute
-        self.host = (self.page.host)
+        self.host = self.page.host
         return self.page
 
     def follow(self):
-        """Follow redirection
-        """
+        """Follow redirection"""
         if "Location" in self.page.headers.keys():
             return self.goto(self.page.headers.get("Location"))
 
     def goin(self, sub_path: str):
-        """Go in child local path
-        """
+        """Go in child local path"""
         path = self.page.path
         if path.endswith("/"):
             path = path[:-1]
@@ -122,13 +115,11 @@ class HTTPSession(AsyncSession):
         return self.goto("/".join([path, sub_path]))
 
     def goout(self):
-        """Go in parent path
-        """
+        """Go in parent path"""
         return self.goto("/".join(self.page.path.split("/")[:-1]))
 
     def prev(self):
-        """Go on previous page
-        """
+        """Go on previous page"""
         if self.page_index > 0:
             self.page_index -= 1
             self.page = self.run(
@@ -137,8 +128,7 @@ class HTTPSession(AsyncSession):
         return self.page
 
     def next(self):
-        """Go on next page
-        """
+        """Go on next page"""
         if self.page_index < len(self.hist) - 1:
             self.page_index += 1
             self.page = self.run(

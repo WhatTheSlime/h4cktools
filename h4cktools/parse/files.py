@@ -8,17 +8,17 @@ __all__ = ["loadlist"]
 
 
 def loadlist(
-    file_path: str, 
-    separator: str = "", 
+    file_path: str,
+    separator: str = "",
     strip: bool = True,
     replace: dict = {},
-    ignores: list = []
+    ignores: list = [],
 ) -> list:
     """Loads list from a text file
-    
+
     Args:
         file_path: path to list file
-    
+
     Keywords:
         separator (str): separator use to split lines
         replace (dict): dict containing strings to replace

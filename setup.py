@@ -14,7 +14,6 @@ setup(
     python_requires=">=3.6",
     install_requires=[
         "urllib3==1.25.9",
-        "requests_mock==1.8.0",
         "lxml==4.5.2",
         "requests==2.23.0",
         "beautifulsoup4==4.9.3"
@@ -22,8 +21,9 @@ setup(
     extras_require={
         "tests": [
             "pytest==6.1.2",
-            "pytest-asyncio",
-            "pytest-cov"
+            "pytest-asyncio==0.14.0",
+            "pytest-cov==2.10.1",
+            "requests_mock==1.8.0",
         ],
     }
 )

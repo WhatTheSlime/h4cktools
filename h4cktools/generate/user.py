@@ -5,9 +5,7 @@ from string import ascii_lowercase, ascii_uppercase, digits, punctuation
 __all__ = ["password"]
 
 
-def password(
-    length: int = 20, punc: str = punctuation
-) -> str:
+def password(length: int = 20, punc: str = punctuation) -> str:
     """Generate strong password
 
     Keywords:
@@ -15,7 +13,7 @@ def password(
         punc (str): possible punctuation list (not empty)
 
     Returns:
-        str: generated password 
+        str: generated password
     """
     password = ""
     characters = "".join([ascii_lowercase, ascii_uppercase, digits, punc])
@@ -27,13 +25,13 @@ def password(
         raise AttributeError("length attribute must be greater than 8")
 
     while not (
-        set(password) & set(ascii_lowercase) and 
-        set(password) & set(ascii_uppercase) and 
-        set(password) & set(digits) and
-        set(password) & set(punc)
+        set(password) & set(ascii_lowercase)
+        and set(password) & set(ascii_uppercase)
+        and set(password) & set(digits)
+        and set(password) & set(punc)
     ):
         password = "".join((choice(characters) for _ in range(length)))
-    
+
     return password
 
 

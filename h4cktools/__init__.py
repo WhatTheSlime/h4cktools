@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
- 
+
 """h4cktools is a library containing usefull helpers for penetration testing
 and security challenges. It implements several functions ond objects and add 
 shorcuts for functions and payloads.
@@ -11,10 +11,10 @@ from .http.httpsession import HTTPSession
 
 ## Import versions libs
 from .parse.versions import (
-	version_regex, 
-	extract_version, 
-	extract_versions, 
-	Version as ver
+    version_regex,
+    extract_version,
+    extract_versions,
+    Version as ver,
 )
 
 from .parse.http import *
