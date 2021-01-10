@@ -1,6 +1,2 @@
-comment:
-  layout: "header, diff, tree"
-
-coverage:
-  status:
-    project: false
+codecov:
+  token: 56636cb0-3c4b-4347-a8b7-b844cf70828c
