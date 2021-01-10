@@ -1,15 +1,18 @@
-from setuptools import setup, find_packages
+try:
+    from setuptools import setup, find_packages
+except Exception:
+    raise ImportError("setuptools is required to install h4cktools!")
 
 
 setup(
     name="h4cktools",
-    version="0.0.2",
+    version="0.0.3",
     description="h4cktools is a python library containing usefull helpers "
     "for penetration testing and security challenges.",
     url="https://github.com/WhatTheSlime/h4cktools",
     author="Sélim Lanouar",
     author_email="selim.lanouar@gmail.com",
-    license="CeCILL",
+    license="GPLv3",
     packages=find_packages(),
     python_requires=">=3.6",
     install_requires=[
