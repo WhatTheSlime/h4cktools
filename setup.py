@@ -16,7 +16,7 @@ setup(
     packages=find_packages(),
     python_requires=">=3.6",
     install_requires=[
-        "urllib3==1.25.9",
+        "urllib3==1.26.5",
         "lxml==4.6.2",
         "requests==2.23.0",
         "beautifulsoup4==4.9.3"
